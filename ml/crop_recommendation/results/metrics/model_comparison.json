@@ -1,0 +1,38 @@
+[
+  {
+    "Model": "Logistic Regression (Baseline)",
+    "Val Accuracy": 0.9667,
+    "Val F1 (Macro)": 0.9665,
+    "Test Accuracy": 0.9788,
+    "Test Precision (Macro)": 0.9795,
+    "Test Recall (Macro)": 0.9788,
+    "Test F1 (Macro)": 0.9787,
+    "Top-1 Accuracy": 0.9788,
+    "Top-3 Accuracy": 1.0,
+    "Top-5 Accuracy": 1.0
+  },
+  {
+    "Model": "Random Forest (Baseline)",
+    "Val Accuracy": 0.9909,
+    "Val F1 (Macro)": 0.9909,
+    "Test Accuracy": 0.9939,
+    "Test Precision (Macro)": 0.9943,
+    "Test Recall (Macro)": 0.9939,
+    "Test F1 (Macro)": 0.9939,
+    "Top-1 Accuracy": 0.9939,
+    "Top-3 Accuracy": 1.0,
+    "Top-5 Accuracy": 1.0
+  },
+  {
+    "Model": "LSTM Neural Network (Primary)",
+    "Val Accuracy": 0.9879,
+    "Val F1 (Macro)": 0.988,
+    "Test Accuracy": 0.9848,
+    "Test Precision (Macro)": 0.9861,
+    "Test Recall (Macro)": 0.9848,
+    "Test F1 (Macro)": 0.9848,
+    "Top-1 Accuracy": 0.9848,
+    "Top-3 Accuracy": 1.0,
+    "Top-5 Accuracy": 1.0
+  }
+]

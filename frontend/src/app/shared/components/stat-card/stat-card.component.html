@@ -1,0 +1,21 @@
+<div class="stat-card" [class]="'theme-' + color()">
+  <div class="stat-header">
+    <span class="stat-title">{{ title() }}</span>
+    <div class="stat-icon-wrapper">
+      <span class="material-symbols-outlined stat-icon">{{ icon() }}</span>
+    </div>
+  </div>
+  <div class="stat-body">
+    <div class="stat-value">{{ value() }}</div>
+    @if (subtitle() || trend()) {
+      <div class="stat-footer">
+        @if (trend()) {
+          <span class="stat-trend">{{ trend() }}</span>
+        }
+        @if (subtitle()) {
+          <span class="stat-subtitle">{{ subtitle() }}</span>
+        }
+      </div>
+    }
+  </div>
+</div>

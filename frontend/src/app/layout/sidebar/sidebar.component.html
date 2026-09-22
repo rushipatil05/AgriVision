@@ -1,0 +1,53 @@
+<div class="sidebar-backdrop" [class.open]="isOpen()" (click)="onClose()"></div>
+
+<aside class="sidebar-panel" [class.open]="isOpen()">
+  <div class="sidebar-header">
+    <div class="sidebar-brand">
+      <span class="material-symbols-outlined brand-icon">energy_savings_leaf</span>
+      <div class="brand-info">
+        <span class="brand-name">AgriPulse</span>
+        <span class="brand-tagline">AI Agriculture Platform</span>
+      </div>
+    </div>
+    <button type="button" class="btn-close" (click)="onClose()" aria-label="Close sidebar">
+      <span class="material-symbols-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="sidebar-section-title">Navigation</div>
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.path === '/dashboard' }"
+        (click)="onClose()"
+        class="nav-item"
+      >
+        <div class="nav-item-icon">
+          <span class="material-symbols-outlined">{{ item.icon }}</span>
+        </div>
+        <div class="nav-item-text">
+          <span class="nav-item-label">{{ item.label }}</span>
+          <span class="nav-item-desc">{{ item.description }}</span>
+        </div>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-divider"></div>
+
+  <div class="sidebar-footer">
+    <div class="system-status-pill">
+      <span class="status-dot online"></span>
+      <span class="status-text">Core AI Service Online</span>
+    </div>
+
+    @if (authService.isAuthenticatedSignal()) {
+      <button type="button" class="btn-sidebar-logout" (click)="onLogout()">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Sign Out</span>
+      </button>
+    }
+  </div>
+</aside>

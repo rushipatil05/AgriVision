@@ -1,0 +1,23 @@
+{
+  "train": {
+    "model": "LSTM (Train - Onion)",
+    "mae": 56.53,
+    "rmse": 151.0,
+    "mape": 6.65,
+    "r2_score": 0.966
+  },
+  "validation": {
+    "model": "LSTM (Validation - Onion)",
+    "mae": 0.5,
+    "rmse": 4.9,
+    "mape": 0.09,
+    "r2_score": 0.3169
+  },
+  "test": {
+    "model": "LSTM (Test - Onion)",
+    "mae": 129.81,
+    "rmse": 253.07,
+    "mape": 6.47,
+    "r2_score": 0.9375
+  }
+}

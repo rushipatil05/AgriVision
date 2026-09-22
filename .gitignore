@@ -1,0 +1,120 @@
+# ==========================================
+# AgriPulse .gitignore
+# ==========================================
+
+# Environments and Secrets
+.env
+.env.local
+.env.*.local
+*.env
+*.pem
+*.key
+*.cert
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+
+# Machine Learning Datasets & Binary Artifacts
+# Exclude raw & processed data files and binary model weights (track .gitkeep and README.md)
+*.csv
+*.xlsx
+*.parquet
+*.jsonl
+*.zip
+*.tar.gz
+*.h5
+*.keras
+*.pkl
+*.joblib
+*.pt
+*.pth
+*.onnx
+
+# EDA Visualization Plots
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.pdf
+
+# Node / Angular
+frontend/agripulse-ui/node_modules/
+frontend/agripulse-ui/dist/
+frontend/agripulse-ui/.angular/
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Database & Local Volumes
+*.sqlite3
+*.db
+pgdata/
+postgres_data/
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Always preserve structural files
+!.gitkeep
+!README.md
+!*.md

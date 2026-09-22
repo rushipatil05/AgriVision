@@ -1,0 +1,234 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-icon-badge">
+      <span class="material-symbols-outlined">agriculture</span>
+    </div>
+    <div class="header-content">
+      <div class="header-tag">Deep Learning Subsystem 3C</div>
+      <h1 class="page-title">DNN Crop Yield Forecasting</h1>
+      <p class="page-subtitle">
+        Predict harvest productivity (Tonnes/Hectare) and total farm production across 33 States & 646 Indian districts using Deep Neural Networks ($R^2 = 0.9165$).
+      </p>
+    </div>
+  </header>
+
+  <!-- Regional Presets -->
+  <section class="presets-section">
+    <span class="presets-label">Regional Presets:</span>
+    <div class="preset-buttons">
+      @for (preset of presets; track preset.name) {
+        <button
+          type="button"
+          class="btn-preset"
+          (click)="applyPreset(preset)"
+        >
+          <span class="material-symbols-outlined">location_on</span>
+          <span>{{ preset.name }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (errorMessage()) {
+    <div class="alert-error" role="alert">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Form Card -->
+    <div class="card form-card">
+      <div class="card-header">
+        <h2 class="card-title">Cultivation & Geographic Inputs</h2>
+        <span class="badge-tag">Agricultural Features</span>
+      </div>
+
+      <form [formGroup]="yieldForm" (ngSubmit)="onSubmit()" class="parameter-form" novalidate>
+        <div class="form-row">
+          <!-- State -->
+          <div class="form-group">
+            <label for="state" class="form-label">State / Union Territory</label>
+            <select id="state" formControlName="state" class="form-control">
+              @for (st of states; track st) {
+                <option [value]="st">{{ st }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- District -->
+          <div class="form-group">
+            <label for="district" class="form-label">District Name</label>
+            <input
+              id="district"
+              type="text"
+              formControlName="district"
+              class="form-control"
+              placeholder="e.g. Ludhiana, Nagpur, Belagavi"
+            />
+            @if (yieldForm.get('district')?.invalid && yieldForm.get('district')?.touched) {
+              <span class="error-msg">District is required.</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Crop -->
+          <div class="form-group">
+            <label for="crop" class="form-label">Crop Type</label>
+            <select id="crop" formControlName="crop" class="form-control">
+              @for (c of crops; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Season -->
+          <div class="form-group">
+            <label for="season" class="form-label">Crop Season</label>
+            <select id="season" formControlName="season" class="form-control">
+              @for (s of seasons; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Area -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="area" class="form-label">Cultivation Area</label>
+              <span class="unit-tag">Hectares (ha)</span>
+            </div>
+            <input id="area" type="number" step="0.1" formControlName="area" class="form-control" />
+            @if (yieldForm.get('area')?.invalid && yieldForm.get('area')?.touched) {
+              <span class="error-msg">Valid area is required (> 0).</span>
+            }
+          </div>
+
+          <!-- Crop Year -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="crop_year" class="form-label">Crop Year</label>
+              <span class="unit-tag">Year</span>
+            </div>
+            <input id="crop_year" type="number" formControlName="crop_year" class="form-control" />
+          </div>
+        </div>
+
+        <!-- Model Selection -->
+        <div class="form-group">
+          <label for="model_type" class="form-label">Prediction Model</label>
+          <select id="model_type" formControlName="model_type" class="form-control">
+            <option value="deep_neural_network">Deep Neural Network (DNN Regressor - Primary)</option>
+            <option value="random_forest">Random Forest Baseline</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="btn-spinner"></span>
+            <span>Calculating Yield & Harvest...</span>
+          } @else {
+            <span class="material-symbols-outlined">analytics</span>
+            <span>Predict Harvest Yield</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Results Column -->
+    <div class="results-column">
+      @if (isLoading()) {
+        <div class="card loading-card">
+          <app-loading-spinner message="Computing harvest projections using Deep Neural Network..."></app-loading-spinner>
+        </div>
+      } @else if (result(); as res) {
+        <!-- Yield Hero Output Card -->
+        <div class="yield-hero-card">
+          <div class="yield-hero-header">
+            <span class="yield-tag">Estimated Harvest Projection</span>
+            <span class="latency-pill">{{ res.execution_time_ms.toFixed(1) }} ms</span>
+          </div>
+
+          <div class="yield-hero-body">
+            <div class="yield-main-metric">
+              <span class="metric-title">Predicted Yield</span>
+              <div class="metric-value">
+                {{ res.predicted_yield_tonnes_per_hectare.toFixed(2) }}
+                <span class="metric-unit">Tonnes / Ha</span>
+              </div>
+              <div class="productivity-pill" [class]="getProductivityLevel(res.predicted_yield_tonnes_per_hectare).class">
+                <span class="status-dot"></span>
+                <span>{{ getProductivityLevel(res.predicted_yield_tonnes_per_hectare).label }}</span>
+              </div>
+            </div>
+
+            <div class="production-summary-box">
+              <span class="prod-title">Total Farm Production</span>
+              <div class="prod-value">
+                {{ res.estimated_total_production_tonnes.toFixed(2) }}
+                <span class="prod-unit">Tonnes</span>
+              </div>
+              <span class="prod-calc">Across {{ res.area_hectares }} Hectares</span>
+            </div>
+          </div>
+
+          <div class="yield-hero-footer">
+            <div class="meta-item">
+              <span class="meta-lbl">Region:</span>
+              <span class="meta-val">{{ res.district }}, {{ res.state }}</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-lbl">Crop & Season:</span>
+              <span class="meta-val">{{ res.crop }} ({{ res.season }})</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-lbl">Model:</span>
+              <span class="meta-val">{{ res.model_used }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Harvest Efficiency Cards -->
+        <div class="efficiency-cards-grid">
+          <div class="stat-card-inner">
+            <div class="inner-icon-box blue">
+              <span class="material-symbols-outlined">domain</span>
+            </div>
+            <div class="inner-info">
+              <span class="inner-label">Cultivation Area</span>
+              <span class="inner-value">{{ res.area_hectares }} Hectares</span>
+              <span class="inner-sub">{{ (res.area_hectares * 2.47105).toFixed(1) }} Acres equivalent</span>
+            </div>
+          </div>
+
+          <div class="stat-card-inner">
+            <div class="inner-icon-box green">
+              <span class="material-symbols-outlined">inventory_2</span>
+            </div>
+            <div class="inner-info">
+              <span class="inner-label">Output in Quintals</span>
+              <span class="inner-value">{{ (res.estimated_total_production_tonnes * 10).toFixed(0) }} Qtl</span>
+              <span class="inner-sub">Mandi wholesale trade unit</span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Placeholder -->
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <span class="material-symbols-outlined">agriculture</span>
+          </div>
+          <h3 class="placeholder-title">Ready for Yield Prediction</h3>
+          <p class="placeholder-desc">
+            Select your region, crop, season, and cultivation acreage, or choose a regional preset above, then click <strong>Predict Harvest Yield</strong>.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

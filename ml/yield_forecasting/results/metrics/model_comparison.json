@@ -1,0 +1,57 @@
+[
+  {
+    "Model": "Median Yield Baseline",
+    "Val MAE (t/ha)": 7.108,
+    "Val RMSE (t/ha)": 20.046,
+    "Val R2": -0.1256,
+    "Test MAE (t/ha)": 7.13,
+    "Test RMSE (t/ha)": 20.099,
+    "Test R2": -0.1247,
+    "Test MedAE (t/ha)": 0.827,
+    "Test MAPE (%)": 70.16
+  },
+  {
+    "Model": "Ridge Linear Regression",
+    "Val MAE (t/ha)": 3.896,
+    "Val RMSE (t/ha)": 8.889,
+    "Val R2": 0.7786,
+    "Test MAE (t/ha)": 3.605,
+    "Test RMSE (t/ha)": 8.706,
+    "Test R2": 0.789,
+    "Test MedAE (t/ha)": 1.522,
+    "Test MAPE (%)": 122.33
+  },
+  {
+    "Model": "Histogram Gradient Boosting",
+    "Val MAE (t/ha)": 2.042,
+    "Val RMSE (t/ha)": 6.635,
+    "Val R2": 0.8767,
+    "Test MAE (t/ha)": 1.884,
+    "Test RMSE (t/ha)": 6.208,
+    "Test R2": 0.8927,
+    "Test MedAE (t/ha)": 0.567,
+    "Test MAPE (%)": 53.92
+  },
+  {
+    "Model": "Random Forest Regressor",
+    "Val MAE (t/ha)": 1.857,
+    "Val RMSE (t/ha)": 6.163,
+    "Val R2": 0.8936,
+    "Test MAE (t/ha)": 1.783,
+    "Test RMSE (t/ha)": 5.901,
+    "Test R2": 0.9031,
+    "Test MedAE (t/ha)": 0.467,
+    "Test MAPE (%)": 44.45
+  },
+  {
+    "Model": "Deep Neural Network (DNN)",
+    "Val MAE (t/ha)": 1.781,
+    "Val RMSE (t/ha)": 5.866,
+    "Val R2": 0.9036,
+    "Test MAE (t/ha)": 1.697,
+    "Test RMSE (t/ha)": 5.478,
+    "Test R2": 0.9165,
+    "Test MedAE (t/ha)": 0.537,
+    "Test MAPE (%)": 49.78
+  }
+]

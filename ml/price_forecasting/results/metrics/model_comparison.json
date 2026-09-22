@@ -1,0 +1,42 @@
+[
+  {
+    "Model": "Naive (Last-Value Baseline)",
+    "Val MAE (INR/Qtl)": 0.16,
+    "Val RMSE (INR/Qtl)": 3.71,
+    "Val MAPE (%)": 0.03,
+    "Test MAE (INR/Qtl)": 89.04,
+    "Test RMSE (INR/Qtl)": 199.7,
+    "Test MAPE (%)": 4.81,
+    "Test R2": 0.9611
+  },
+  {
+    "Model": "Moving Average (7-Day Baseline)",
+    "Val MAE (INR/Qtl)": 0.65,
+    "Val RMSE (INR/Qtl)": 6.59,
+    "Val MAPE (%)": 0.11,
+    "Test MAE (INR/Qtl)": 160.55,
+    "Test RMSE (INR/Qtl)": 318.31,
+    "Test MAPE (%)": 8.41,
+    "Test R2": 0.9011
+  },
+  {
+    "Model": "Linear Regression (Autoregressive)",
+    "Val MAE (INR/Qtl)": 1.15,
+    "Val RMSE (INR/Qtl)": 4.2,
+    "Val MAPE (%)": 0.19,
+    "Test MAE (INR/Qtl)": 101.96,
+    "Test RMSE (INR/Qtl)": 206.7,
+    "Test MAPE (%)": 5.47,
+    "Test R2": 0.9583
+  },
+  {
+    "Model": "LSTM Neural Network (Primary)",
+    "Val MAE (INR/Qtl)": 0.5,
+    "Val RMSE (INR/Qtl)": 4.9,
+    "Val MAPE (%)": 0.09,
+    "Test MAE (INR/Qtl)": 129.81,
+    "Test RMSE (INR/Qtl)": 253.07,
+    "Test MAPE (%)": 6.47,
+    "Test R2": 0.9375
+  }
+]

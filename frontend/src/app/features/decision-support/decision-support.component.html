@@ -1,0 +1,364 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-icon-badge">
+      <span class="material-symbols-outlined">psychology_alt</span>
+    </div>
+    <div class="header-content">
+      <div class="header-tag">Integrated Intelligence — Level 7</div>
+      <h1 class="page-title">AI Agricultural Decision Support System</h1>
+      <p class="page-subtitle">
+        Holistic multi-criteria decision engine orchestrating LSTM Crop Suitability, Neural Harvest Yield Projections, and Time-Series Market Price Trajectories.
+      </p>
+    </div>
+  </header>
+
+  <!-- Presets Bar -->
+  <section class="presets-section">
+    <span class="presets-label">Decision Scenarios:</span>
+    <div class="preset-buttons">
+      @for (preset of presets; track preset.name) {
+        <button
+          type="button"
+          class="btn-preset"
+          (click)="applyPreset(preset)"
+          [title]="preset.description"
+        >
+          <span class="material-symbols-outlined">auto_awesome</span>
+          <span>{{ preset.name }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (errorMessage()) {
+    <div class="alert-error" role="alert">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Section 1: Integrated Input Form -->
+  <div class="content-grid">
+    <div class="card form-card">
+      <div class="card-header">
+        <h2 class="card-title">Multi-Modal Decision Parameters</h2>
+        <span class="badge-tag">Soil + Geo + Market</span>
+      </div>
+
+      <form [formGroup]="decisionForm" (ngSubmit)="onSubmit()" class="parameter-form" novalidate>
+        <!-- Section Title: Soil & Climate -->
+        <div class="form-section-title">
+          <span class="material-symbols-outlined">eco</span>
+          <span>Soil Nutrients & Climate</span>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="N" class="form-label">Nitrogen (N)</label>
+            <input id="N" type="number" formControlName="N" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="P" class="form-label">Phosphorus (P)</label>
+            <input id="P" type="number" formControlName="P" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="K" class="form-label">Potassium (K)</label>
+            <input id="K" type="number" formControlName="K" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row-4">
+          <div class="form-group">
+            <label for="ph" class="form-label">Soil pH</label>
+            <input id="ph" type="number" step="0.1" formControlName="ph" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="temperature" class="form-label">Temp (°C)</label>
+            <input id="temperature" type="number" step="0.1" formControlName="temperature" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="humidity" class="form-label">Humidity (%)</label>
+            <input id="humidity" type="number" step="0.1" formControlName="humidity" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="rainfall" class="form-label">Rain (mm)</label>
+            <input id="rainfall" type="number" step="0.1" formControlName="rainfall" class="form-control" />
+          </div>
+        </div>
+
+        <!-- Section Title: Regional Farming -->
+        <div class="form-section-title">
+          <span class="material-symbols-outlined">agriculture</span>
+          <span>Regional Cultivation & Season</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="state" class="form-label">State</label>
+            <select id="state" formControlName="state" class="form-control">
+              @for (st of states; track st) {
+                <option [value]="st">{{ st }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="district" class="form-label">District</label>
+            <input id="district" type="text" formControlName="district" class="form-control" />
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label for="season" class="form-label">Season</label>
+            <select id="season" formControlName="season" class="form-control">
+              @for (s of seasons; track s) {
+                <option [value]="s">{{ s }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="area" class="form-label">Area (Ha)</label>
+            <input id="area" type="number" step="0.1" formControlName="area" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="crop_year" class="form-label">Year</label>
+            <input id="crop_year" type="number" formControlName="crop_year" class="form-control" />
+          </div>
+        </div>
+
+        <!-- Section Title: Market Mandi -->
+        <div class="form-section-title">
+          <span class="material-symbols-outlined">trending_up</span>
+          <span>Target Market & Horizon</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="market" class="form-label">Mandi Market</label>
+            <select id="market" formControlName="market" class="form-control">
+              @for (m of markets; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="forecast_horizon" class="form-label">Forecast Horizon</label>
+            <select id="forecast_horizon" formControlName="forecast_horizon" class="form-control">
+              <option [value]="1">1 Day</option>
+              <option [value]="7">7 Days</option>
+              <option [value]="30">30 Days</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="btn-spinner"></span>
+            <span>Synthesizing Multi-Modal Decision...</span>
+          } @else {
+            <span class="material-symbols-outlined">psychology</span>
+            <span>Execute AI Decision Support</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-column">
+      @if (isLoading()) {
+        <div class="card loading-card">
+          <app-loading-spinner message="Running multi-objective agricultural optimization across Crop, Yield & Market AI..."></app-loading-spinner>
+        </div>
+      } @else if (result(); as res) {
+        <!-- Section 2 & 6: Recommended Crop & Decision Score Hero -->
+        <div class="hero-decision-card">
+          <div class="hero-glow"></div>
+          <div class="hero-top-row">
+            <div class="hero-tag-badge">
+              <span class="status-dot"></span>
+              <span>Rank #1 Agricultural Recommendation</span>
+            </div>
+            <span class="latency-pill">{{ res.execution_time_ms.toFixed(1) }} ms</span>
+          </div>
+
+          <div class="hero-main-row">
+            <div class="crop-hero-left">
+              <div class="crop-icon-bubble">
+                <span class="material-symbols-outlined">verified</span>
+              </div>
+              <div class="crop-title-group">
+                <h2 class="hero-crop-title">{{ res.recommended_crop | titlecase }}</h2>
+                <span class="hero-subtext">Optimized for {{ decisionForm.get('district')?.value }}, {{ decisionForm.get('state')?.value }} ({{ decisionForm.get('season')?.value }} Season)</span>
+              </div>
+            </div>
+
+            <div class="decision-score-badge">
+              <span class="score-label">Decision Score</span>
+              <div class="score-val">{{ res.decision_score.toFixed(1) }}<span class="score-max">/100</span></div>
+            </div>
+          </div>
+
+          <!-- Section 3, 4, 5: 3 Core Indicators Grid -->
+          <div class="indicators-grid">
+            <div class="indicator-box">
+              <span class="ind-lbl">Suitability (40%)</span>
+              <div class="ind-val">{{ (res.crop_confidence * 100).toFixed(1) }}%</div>
+              <span class="ind-sub">Score: {{ res.suitability_score.toFixed(1) }} pts</span>
+            </div>
+
+            <div class="indicator-box">
+              <span class="ind-lbl">Predicted Yield (35%)</span>
+              <div class="ind-val">{{ res.predicted_yield.toFixed(2) }} t/ha</div>
+              <span class="ind-sub">Total: {{ res.estimated_production_tonnes.toFixed(1) }} Tonnes</span>
+            </div>
+
+            <div class="indicator-box">
+              <span class="ind-lbl">Market Forecast (25%)</span>
+              <div class="ind-val">₹{{ res.forecast_price.toFixed(2) }}/qtl</div>
+              <span class="ind-sub">{{ res.price_trend }} in {{ res.market }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 7: Multi-Factor Comparison Chart -->
+        <div class="card chart-card">
+          <div class="card-header">
+            <div>
+              <h3 class="chart-title">Candidate Crop Comparative Scoring</h3>
+              <p class="chart-subtitle">Weighted breakdown across Suitability, Harvest Yield, and Market Price</p>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas
+              baseChart
+              [data]="barChartData"
+              [options]="barChartOptions"
+              [type]="barChartType"
+            >
+            </canvas>
+          </div>
+        </div>
+
+        <!-- Section 7: Alternatives Comparison Table -->
+        <div class="card table-card">
+          <div class="card-header">
+            <h3 class="card-title">Alternative Candidate Crop Rankings</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="alternatives-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Crop Variety</th>
+                  <th>Decision Score</th>
+                  <th>Suitability</th>
+                  <th>Predicted Yield</th>
+                  <th>Market Price</th>
+                  <th>Price Trend</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (alt of res.alternatives; track alt.rank) {
+                  <tr [class.highlight]="alt.rank === 1">
+                    <td class="rank-cell">
+                      <span class="rank-badge" [class.gold]="alt.rank === 1">#{{ alt.rank }}</span>
+                    </td>
+                    <td class="crop-cell">
+                      <strong>{{ alt.crop }}</strong>
+                    </td>
+                    <td class="score-cell">
+                      <strong>{{ alt.decision_score.toFixed(1) }}</strong> / 100
+                    </td>
+                    <td>{{ (alt.suitability_probability * 100).toFixed(1) }}%</td>
+                    <td>{{ alt.predicted_yield_tonnes_per_hectare.toFixed(2) }} t/ha</td>
+                    <td>₹{{ alt.forecasted_market_price.toFixed(2) }}/qtl</td>
+                    <td>
+                      <span class="trend-tag" [class]="alt.price_trend.toLowerCase()">
+                        {{ alt.price_trend }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Section 8: Dynamic Recommendation Explanation -->
+        <div class="card explanation-card">
+          <div class="card-header">
+            <div class="header-with-icon">
+              <span class="material-symbols-outlined card-icon emerald">lightbulb</span>
+              <div>
+                <h3 class="card-title">Dynamic Agricultural Explanation Rationale</h3>
+                <p class="card-subtitle">Automated reasoning derived from verified deep learning inferences</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="explanation-body">
+            <div class="summary-callout">
+              <span class="material-symbols-outlined">format_quote</span>
+              <p>{{ res.explanation.summary }}</p>
+            </div>
+
+            <div class="explanation-sections-grid">
+              <div class="exp-box">
+                <span class="exp-title">Soil Nutrient Compatibility</span>
+                <p class="exp-text">{{ res.explanation.soil_compatibility }}</p>
+              </div>
+              <div class="exp-box">
+                <span class="exp-title">Climatic & Agro-Ecological Fit</span>
+                <p class="exp-text">{{ res.explanation.climatic_suitability }}</p>
+              </div>
+              <div class="exp-box">
+                <span class="exp-title">Harvest Production Potential</span>
+                <p class="exp-text">{{ res.explanation.yield_potential }}</p>
+              </div>
+              <div class="exp-box">
+                <span class="exp-title">Market Mandi Commercial Outlook</span>
+                <p class="exp-text">{{ res.explanation.market_outlook }}</p>
+              </div>
+            </div>
+
+            <div class="advantages-box">
+              <span class="adv-title">Key Decision Advantages:</span>
+              <ul class="adv-list">
+                @for (adv of res.explanation.key_advantages; track adv) {
+                  <li>
+                    <span class="material-symbols-outlined check-icon">check_circle</span>
+                    <span>{{ adv }}</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 9: Decision History Link -->
+        <div class="history-callout-card">
+          <div class="hist-info">
+            <span class="material-symbols-outlined hist-icon">history</span>
+            <div>
+              <span class="hist-title">Decision Audit Trail Logged</span>
+              <p class="hist-sub">This multi-criteria decision run has been recorded in your prediction history.</p>
+            </div>
+          </div>
+          <a routerLink="/history" class="btn-view-hist">View In History</a>
+        </div>
+      } @else {
+        <!-- Initial Placeholder -->
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <span class="material-symbols-outlined">psychology_alt</span>
+          </div>
+          <h3 class="placeholder-title">Ready for Multi-Modal AI Decision Support</h3>
+          <p class="placeholder-desc">
+            Configure your farm's soil chemical parameters, geographic location, and target mandi market on the left, or select a decision preset, then click <strong>Execute AI Decision Support</strong>.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

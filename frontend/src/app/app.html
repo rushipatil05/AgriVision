@@ -1,0 +1,11 @@
+<div class="app-shell">
+  <app-navbar (toggleSidebar)="onToggleSidebar()"></app-navbar>
+
+  <app-sidebar [isOpen]="isSidebarOpen()" (closeSidebar)="onCloseSidebar()"></app-sidebar>
+
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <app-footer></app-footer>
+</div>

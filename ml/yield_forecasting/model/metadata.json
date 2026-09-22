@@ -1,0 +1,71 @@
+{
+  "model_type": "Deep_Neural_Network_Regressor",
+  "keras_version": "3.15.1",
+  "tensorflow_version": "2.21.0",
+  "features": [
+    "State_Name",
+    "District_Name",
+    "Crop",
+    "Season",
+    "Area",
+    "Crop_Year"
+  ],
+  "leakage_check_production_excluded": true,
+  "benchmark_crops": [
+    "Rice",
+    "Wheat",
+    "Maize",
+    "Sugarcane",
+    "Cotton(lint)",
+    "Bajra",
+    "Jowar",
+    "Gram",
+    "Groundnut",
+    "Potato"
+  ],
+  "total_cleaned_records": 84183,
+  "splits": {
+    "train_records": 71209,
+    "val_records": 9003,
+    "test_records": 3971
+  },
+  "encoded_feature_dimensions": 662,
+  "epochs_trained": 19,
+  "training_time_seconds": 86.03,
+  "hyperparameters": {
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "dense_units": [
+      128,
+      64,
+      32
+    ],
+    "dropout_rate": 0.2
+  },
+  "metrics": {
+    "train": {
+      "model": "Deep Neural Network (Train)",
+      "mae": 1.309,
+      "rmse": 4.212,
+      "r2_score": 0.9444,
+      "medae": 0.42,
+      "mape": 45.68
+    },
+    "validation": {
+      "model": "Deep Neural Network (Validation)",
+      "mae": 1.781,
+      "rmse": 5.866,
+      "r2_score": 0.9036,
+      "medae": 0.512,
+      "mape": 41.01
+    },
+    "test": {
+      "model": "Deep Neural Network (Test)",
+      "mae": 1.697,
+      "rmse": 5.478,
+      "r2_score": 0.9165,
+      "medae": 0.537,
+      "mape": 49.78
+    }
+  }
+}

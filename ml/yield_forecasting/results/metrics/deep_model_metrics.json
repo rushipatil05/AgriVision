@@ -1,0 +1,26 @@
+{
+  "train": {
+    "model": "Deep Neural Network (Train)",
+    "mae": 1.309,
+    "rmse": 4.212,
+    "r2_score": 0.9444,
+    "medae": 0.42,
+    "mape": 45.68
+  },
+  "validation": {
+    "model": "Deep Neural Network (Validation)",
+    "mae": 1.781,
+    "rmse": 5.866,
+    "r2_score": 0.9036,
+    "medae": 0.512,
+    "mape": 41.01
+  },
+  "test": {
+    "model": "Deep Neural Network (Test)",
+    "mae": 1.697,
+    "rmse": 5.478,
+    "r2_score": 0.9165,
+    "medae": 0.537,
+    "mape": 49.78
+  }
+}

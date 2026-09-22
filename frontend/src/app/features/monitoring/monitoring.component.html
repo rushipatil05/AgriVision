@@ -1,0 +1,612 @@
+<div class="monitoring-container">
+  <!-- Header & Live Controls -->
+  <header class="page-header">
+    <div class="header-left">
+      <div class="header-badge">
+        <span class="live-dot" [class.active]="healthData()?.status === 'healthy'"></span>
+        <span>MLOps & Telemetry Hub</span>
+      </div>
+      <h1 class="page-title">System & Model Monitoring</h1>
+      <p class="page-subtitle">
+        Real-time operational health, automated feature drift detection, endpoint telemetry, and preloaded neural model registry.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <div class="refresh-control">
+        <label for="autoRefreshSelect" class="control-label">Auto-refresh:</label>
+        <select
+          id="autoRefreshSelect"
+          class="select-interval"
+          [value]="autoRefreshInterval()"
+          (change)="setAutoRefresh(+$any($event.target).value)"
+        >
+          <option [value]="0">Off</option>
+          <option [value]="15">Every 15s</option>
+          <option [value]="30">Every 30s</option>
+          <option [value]="60">Every 60s</option>
+        </select>
+      </div>
+
+      <button
+        type="button"
+        class="btn-refresh"
+        (click)="refreshData()"
+        [disabled]="isRefreshing()"
+        title="Refresh Telemetry"
+      >
+        <span class="material-symbols-outlined" [class.spin]="isRefreshing()">refresh</span>
+        <span>{{ isRefreshing() ? 'Refreshing...' : 'Refresh' }}</span>
+      </button>
+
+      <span class="last-updated" *ngIf="lastUpdated()">
+        Updated: {{ lastUpdated() | date: 'HH:mm:ss' }}
+      </span>
+    </div>
+  </header>
+
+  <!-- Error Alert -->
+  <div class="alert-banner error" *ngIf="errorMessage()">
+    <span class="material-symbols-outlined alert-icon">error</span>
+    <div class="alert-content">
+      <strong>Telemetry Error:</strong> {{ errorMessage() }}
+    </div>
+    <button type="button" class="btn-retry" (click)="loadAllMonitoringData()">Retry</button>
+  </div>
+
+  <!-- Tab Navigation -->
+  <nav class="monitoring-tabs">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'overview'"
+      (click)="setTab('overview')"
+    >
+      <span class="material-symbols-outlined">health_and_safety</span>
+      <span>Overview & Health</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'models'"
+      (click)="setTab('models')"
+    >
+      <span class="material-symbols-outlined">inventory_2</span>
+      <span>Model Registry ({{ modelsData()?.total_models || 4 }})</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'telemetry'"
+      (click)="setTab('telemetry')"
+    >
+      <span class="material-symbols-outlined">speed</span>
+      <span>API Telemetry</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'drift'"
+      (click)="setTab('drift')"
+    >
+      <span class="material-symbols-outlined">analytics</span>
+      <span>Data Drift Monitor</span>
+    </button>
+
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'distributions'"
+      (click)="setTab('distributions')"
+    >
+      <span class="material-symbols-outlined">pie_chart</span>
+      <span>Output Distributions</span>
+    </button>
+  </nav>
+
+  <!-- Loading State -->
+  <div class="loading-wrap" *ngIf="isLoading()">
+    <app-loading-spinner message="Collecting real-time MLOps telemetry..." size="lg"></app-loading-spinner>
+  </div>
+
+  <!-- Content Tabs -->
+  <div class="tab-content-area" *ngIf="!isLoading()">
+    <!-- TAB 1: OVERVIEW & HEALTH -->
+    <section class="tab-pane" *ngIf="activeTab() === 'overview'">
+      <!-- Stat KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon emerald">
+            <span class="material-symbols-outlined">check_circle</span>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">System Health</span>
+            <span class="kpi-value text-emerald">{{ healthData()?.status | uppercase }}</span>
+            <span class="kpi-sub">All Core Subsystems Online</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon blue">
+            <span class="material-symbols-outlined">timer</span>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">Uptime</span>
+            <span class="kpi-value">{{ formatUptime(healthData()?.uptime_seconds || 0) }}</span>
+            <span class="kpi-sub">Continuous Active Execution</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon purple">
+            <span class="material-symbols-outlined">dataset</span>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">Total Predictions Logged</span>
+            <span class="kpi-value">{{ metricsData()?.total_predictions || 0 }}</span>
+            <span class="kpi-sub">Audited Database Inferences</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon amber">
+            <span class="material-symbols-outlined">bolt</span>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">Avg API Latency</span>
+            <span class="kpi-value">{{ (metricsData()?.overall_avg_latency_ms || 0).toFixed(1) }} ms</span>
+            <span class="kpi-sub">{{ (metricsData()?.success_rate_percentage || 100).toFixed(1) }}% Success Rate</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subsystem Health Panels -->
+      <div class="subsystems-grid">
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="material-symbols-outlined panel-icon">database</span>
+              <h2 class="panel-title">PostgreSQL Database Connection</h2>
+            </div>
+            <span class="badge" [ngClass]="getHealthBadgeClass(healthData()?.database?.status || 'healthy')">
+              {{ healthData()?.database?.status || 'CONNECTED' }}
+            </span>
+          </div>
+          <div class="panel-body">
+            <div class="meta-row">
+              <span class="meta-name">Status:</span>
+              <span class="meta-val text-emerald font-semibold">Active & Responsive</span>
+            </div>
+            <div class="meta-row" *ngIf="healthData()?.database?.latency_ms !== undefined">
+              <span class="meta-name">Query Latency:</span>
+              <span class="meta-val">{{ healthData()?.database?.latency_ms?.toFixed(2) }} ms</span>
+            </div>
+            <div class="meta-row">
+              <span class="meta-name">Schema Verification:</span>
+              <span class="meta-val">Level 5 Users & History Synced</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-header">
+            <div class="panel-title-wrap">
+              <span class="material-symbols-outlined panel-icon">memory</span>
+              <h2 class="panel-title">Neural Model Inference Engine</h2>
+            </div>
+            <span class="badge badge-success">4 PRELOADED</span>
+          </div>
+          <div class="panel-body">
+            <div class="model-status-list">
+              <div class="model-status-row" *ngFor="let item of (healthData()?.models | keyvalue)">
+                <div class="model-name-type">
+                  <span class="dot-online"></span>
+                  <span class="model-row-name">{{ item.key }}</span>
+                  <span class="model-row-type">({{ item.value.model_type }})</span>
+                </div>
+                <span class="badge badge-success-sm">{{ item.value.status }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MODEL REGISTRY -->
+    <section class="tab-pane" *ngIf="activeTab() === 'models'">
+      <div class="section-top">
+        <div>
+          <h2 class="section-title">Production Model Registry Catalog</h2>
+          <p class="section-desc">
+            Immutable versioning, architecture specifications, training metrics, and feature schemas for all 4 preloaded production models.
+          </p>
+        </div>
+        <div class="registry-stats">
+          <span class="badge badge-purple">Version: v1.0.0-prod</span>
+          <span class="badge badge-success">Status: 4/4 Ready</span>
+        </div>
+      </div>
+
+      <div class="models-grid">
+        <div class="model-catalog-card" *ngFor="let model of modelsData()?.models">
+          <div class="catalog-header">
+            <div class="catalog-badge-group">
+              <span class="badge badge-outline">{{ model.framework }}</span>
+              <span class="badge badge-success">{{ model.status | uppercase }}</span>
+            </div>
+            <h3 class="catalog-title">{{ model.model_name }}</h3>
+            <span class="catalog-id">ID: <code>{{ model.model_id }}</code></span>
+          </div>
+
+          <div class="catalog-body">
+            <div class="catalog-meta-item">
+              <span class="cat-label">Model Architecture:</span>
+              <span class="cat-val">{{ model.model_type }}</span>
+            </div>
+            <div class="catalog-meta-item">
+              <span class="cat-label">Dataset Source:</span>
+              <span class="cat-val truncate" [title]="model.dataset_source">{{ model.dataset_source }}</span>
+            </div>
+            <div class="catalog-meta-item">
+              <span class="cat-label">Input Features ({{ model.input_features.length }}):</span>
+              <span class="cat-val">{{ model.input_features.slice(0, 3).join(', ') }}{{ model.input_features.length > 3 ? '...' : '' }}</span>
+            </div>
+
+            <div class="metrics-chip-group">
+              <div class="metric-chip" *ngFor="let metric of (model.metrics | keyvalue)">
+                <span class="chip-k">{{ metric.key }}:</span>
+                <span class="chip-v">{{ metric.value }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="catalog-footer">
+            <span class="catalog-version">Version {{ model.version }}</span>
+            <button type="button" class="btn-sm-inspect" (click)="openModelModal(model)">
+              <span class="material-symbols-outlined">visibility</span>
+              <span>Inspect Schema</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: API TELEMETRY -->
+    <section class="tab-pane" *ngIf="activeTab() === 'telemetry'">
+      <div class="section-top">
+        <div>
+          <h2 class="section-title">API Endpoint Telemetry & Latency Profiling</h2>
+          <p class="section-desc">
+            In-memory thread-safe latency profiling, request counters, and failure rates across all inference and management routes.
+          </p>
+        </div>
+      </div>
+
+      <!-- Telemetry Stats Cards -->
+      <div class="telemetry-summary-grid">
+        <div class="telemetry-box">
+          <span class="box-label">Total Requests</span>
+          <span class="box-val">{{ metricsData()?.total_requests || 0 }}</span>
+        </div>
+        <div class="telemetry-box">
+          <span class="box-label">Successful</span>
+          <span class="box-val text-emerald">{{ metricsData()?.successful_requests || 0 }}</span>
+        </div>
+        <div class="telemetry-box">
+          <span class="box-label">Failed Requests</span>
+          <span class="box-val" [class.text-danger]="(metricsData()?.failed_requests || 0) > 0">
+            {{ metricsData()?.failed_requests || 0 }}
+          </span>
+        </div>
+        <div class="telemetry-box">
+          <span class="box-label">Success Rate</span>
+          <span class="box-val text-emerald">{{ (metricsData()?.success_rate_percentage || 100).toFixed(1) }}%</span>
+        </div>
+        <div class="telemetry-box">
+          <span class="box-label">Overall Avg Latency</span>
+          <span class="box-val text-amber">{{ (metricsData()?.overall_avg_latency_ms || 0).toFixed(1) }} ms</span>
+        </div>
+      </div>
+
+      <!-- Endpoint Breakdown Table -->
+      <div class="table-container">
+        <h3 class="table-title">Endpoint Performance Breakdown</h3>
+        <table class="data-table" *ngIf="(metricsData()?.endpoint_breakdown?.length || 0) > 0; else noEndpoints">
+          <thead>
+            <tr>
+              <th>Endpoint</th>
+              <th class="text-right">Requests</th>
+              <th class="text-right">Success</th>
+              <th class="text-right">Failures</th>
+              <th class="text-right">Avg Latency</th>
+              <th class="text-right">Min Latency</th>
+              <th class="text-right">Max Latency</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let ep of metricsData()?.endpoint_breakdown">
+              <td><code>{{ ep.endpoint }}</code></td>
+              <td class="text-right font-medium">{{ ep.total_requests }}</td>
+              <td class="text-right text-emerald">{{ ep.successful_requests }}</td>
+              <td class="text-right" [class.text-danger]="ep.failed_requests > 0">{{ ep.failed_requests }}</td>
+              <td class="text-right font-semibold text-amber">{{ ep.avg_latency_ms.toFixed(1) }} ms</td>
+              <td class="text-right text-muted">{{ ep.min_latency_ms.toFixed(1) }} ms</td>
+              <td class="text-right text-muted">{{ ep.max_latency_ms.toFixed(1) }} ms</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noEndpoints>
+          <div class="empty-telemetry">
+            <span class="material-symbols-outlined">hourglass_empty</span>
+            <p>No endpoint requests logged yet in the current telemetry window.</p>
+          </div>
+        </ng-template>
+      </div>
+    </section>
+
+    <!-- TAB 4: DATA DRIFT MONITOR -->
+    <section class="tab-pane" *ngIf="activeTab() === 'drift'">
+      <div class="section-top">
+        <div>
+          <h2 class="section-title">Soil & Climate Data Drift Analysis</h2>
+          <p class="section-desc">
+            Statistical divergence monitoring comparing live inference parameters against ICAR training baselines using standard Z-shift & KS metrics.
+          </p>
+        </div>
+        <div class="drift-header-badge">
+          <span class="badge" [ngClass]="getDriftBadgeClass(driftData()?.status || 'INSUFFICIENT_DATA')">
+            {{ driftData()?.status }}
+          </span>
+          <span class="sample-count">Sample Size: {{ driftData()?.sample_size || 0 }}</span>
+        </div>
+      </div>
+
+      <!-- Informational banner -->
+      <div class="drift-info-banner">
+        <span class="material-symbols-outlined">info</span>
+        <div>
+          <strong>Evaluation Methodology:</strong> {{ driftData()?.method || 'Z-shift and statistical parameter divergence analysis' }}.
+          <span *ngIf="(driftData()?.sample_size || 0) < 5">
+            A minimum of <strong>5 inference records</strong> is required for statistical significance. Status remains <code>INSUFFICIENT_DATA</code> to ensure zero fabricated reporting.
+          </span>
+        </div>
+      </div>
+
+      <!-- Feature Drift Table -->
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Feature Name</th>
+              <th>Status</th>
+              <th class="text-right">Drift Score</th>
+              <th class="text-right">Baseline (Mean ± Std)</th>
+              <th class="text-right">Baseline [Min, Max]</th>
+              <th class="text-right">Inference (Mean ± Std)</th>
+              <th class="text-right">Inference [Min, Max]</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of driftData()?.features">
+              <td class="font-semibold">{{ item.feature }}</td>
+              <td>
+                <span class="badge" [ngClass]="getDriftBadgeClass(item.status)">
+                  {{ item.status }}
+                </span>
+              </td>
+              <td class="text-right font-mono">{{ item.drift_score.toFixed(3) }}</td>
+              <td class="text-right text-muted">
+                {{ item.baseline_stats.mean.toFixed(2) }} ± {{ item.baseline_stats.std.toFixed(2) }}
+              </td>
+              <td class="text-right text-muted">
+                [{{ item.baseline_stats.min }}, {{ item.baseline_stats.max }}]
+              </td>
+              <td class="text-right font-medium">
+                {{ item.current_stats.mean.toFixed(2) }} ± {{ item.current_stats.std.toFixed(2) }}
+              </td>
+              <td class="text-right font-medium">
+                [{{ item.current_stats.min.toFixed(1) }}, {{ item.current_stats.max.toFixed(1) }}]
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 5: PREDICTION OUTPUT DISTRIBUTIONS -->
+    <section class="tab-pane" *ngIf="activeTab() === 'distributions'">
+      <div class="section-top">
+        <div>
+          <h2 class="section-title">Prediction Output Distributions</h2>
+          <p class="section-desc">
+            Aggregated distribution profiles across historical crop recommendations, price market trajectories, yield densities, and decision scores.
+          </p>
+        </div>
+        <div class="total-pred-badge">
+          <span>Total Predictions: <strong>{{ distributionData()?.total_predictions || 0 }}</strong></span>
+        </div>
+      </div>
+
+      <div class="distributions-grid">
+        <!-- Crop Frequency Card -->
+        <div class="dist-card">
+          <div class="dist-header">
+            <span class="material-symbols-outlined dist-icon emerald">eco</span>
+            <h3 class="dist-title">Crop Recommendation Distribution</h3>
+          </div>
+          <div class="dist-body">
+            <div *ngIf="(distributionData()?.crop_recommendations?.length || 0) > 0; else noCrops">
+              <div class="dist-bar-item" *ngFor="let crop of distributionData()?.crop_recommendations">
+                <div class="dist-bar-header">
+                  <span class="crop-name">{{ crop.crop | titlecase }}</span>
+                  <span class="crop-pct">{{ crop.percentage.toFixed(1) }}% ({{ crop.count }})</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill emerald" [style.width.%]="crop.percentage"></div>
+                </div>
+              </div>
+            </div>
+            <ng-template #noCrops>
+              <div class="empty-dist">No crop recommendation predictions logged yet.</div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Price Trend Card -->
+        <div class="dist-card">
+          <div class="dist-header">
+            <span class="material-symbols-outlined dist-icon amber">trending_up</span>
+            <h3 class="dist-title">Price Forecast Trend Directions</h3>
+          </div>
+          <div class="dist-body">
+            <div *ngIf="(distributionData()?.price_forecasting?.length || 0) > 0; else noPrices">
+              <div class="dist-bar-item" *ngFor="let trend of distributionData()?.price_forecasting">
+                <div class="dist-bar-header">
+                  <span class="trend-name">{{ trend.trend | uppercase }}</span>
+                  <span class="trend-pct">{{ trend.percentage.toFixed(1) }}% ({{ trend.count }})</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill amber" [style.width.%]="trend.percentage"></div>
+                </div>
+              </div>
+            </div>
+            <ng-template #noPrices>
+              <div class="empty-dist">No price forecast predictions logged yet.</div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Yield Stats Card -->
+        <div class="dist-card">
+          <div class="dist-header">
+            <span class="material-symbols-outlined dist-icon blue">agriculture</span>
+            <h3 class="dist-title">Yield Output Density Statistics</h3>
+          </div>
+          <div class="dist-body">
+            <div class="stat-summary-list" *ngIf="distributionData()?.yield_forecasting?.count; else noYield">
+              <div class="stat-line">
+                <span class="stat-line-k">Samples:</span>
+                <span class="stat-line-v">{{ distributionData()?.yield_forecasting?.count }}</span>
+              </div>
+              <div class="stat-line">
+                <span class="stat-line-k">Mean Yield:</span>
+                <span class="stat-line-v font-bold text-blue">{{ distributionData()?.yield_forecasting?.mean_yield_tonnes_per_ha?.toFixed(2) }} t/ha</span>
+              </div>
+              <div class="stat-line">
+                <span class="stat-line-k">Median Yield:</span>
+                <span class="stat-line-v">{{ distributionData()?.yield_forecasting?.median_yield_tonnes_per_ha?.toFixed(2) }} t/ha</span>
+              </div>
+              <div class="stat-line">
+                <span class="stat-line-k">Min / Max Range:</span>
+                <span class="stat-line-v">
+                  [{{ distributionData()?.yield_forecasting?.min_yield_tonnes_per_ha?.toFixed(2) }}, {{ distributionData()?.yield_forecasting?.max_yield_tonnes_per_ha?.toFixed(2) }}] t/ha
+                </span>
+              </div>
+            </div>
+            <ng-template #noYield>
+              <div class="empty-dist">No yield forecasts recorded yet.</div>
+            </ng-template>
+          </div>
+        </div>
+
+        <!-- Decision Stats Card -->
+        <div class="dist-card">
+          <div class="dist-header">
+            <span class="material-symbols-outlined dist-icon purple">psychology</span>
+            <h3 class="dist-title">Decision Score Distribution</h3>
+          </div>
+          <div class="dist-body">
+            <div class="stat-summary-list" *ngIf="distributionData()?.decision_support?.count; else noDecision">
+              <div class="stat-line">
+                <span class="stat-line-k">Evaluated Decisions:</span>
+                <span class="stat-line-v">{{ distributionData()?.decision_support?.count }}</span>
+              </div>
+              <div class="stat-line">
+                <span class="stat-line-k">Mean Composite Score:</span>
+                <span class="stat-line-v font-bold text-purple">{{ distributionData()?.decision_support?.mean_score?.toFixed(1) }} / 100</span>
+              </div>
+              <div class="stat-line">
+                <span class="stat-line-k">Median Score:</span>
+                <span class="stat-line-v">{{ distributionData()?.decision_support?.median_score?.toFixed(1) }} / 100</span>
+              </div>
+              <div class="stat-line">
+                <span class="stat-line-k">Score Range [Min, Max]:</span>
+                <span class="stat-line-v">
+                  [{{ distributionData()?.decision_support?.min_score?.toFixed(1) }}, {{ distributionData()?.decision_support?.max_score?.toFixed(1) }}]
+                </span>
+              </div>
+            </div>
+            <ng-template #noDecision>
+              <div class="empty-dist">No decision support inferences recorded yet.</div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Model Inspect Modal -->
+  <div class="modal-backdrop" *ngIf="selectedModel()" (click)="closeModelModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="material-symbols-outlined modal-icon">inventory_2</span>
+          <div>
+            <h2 class="modal-title">{{ selectedModel()?.model_name }}</h2>
+            <span class="modal-sub">ID: {{ selectedModel()?.model_id }} | Version: {{ selectedModel()?.version }}</span>
+          </div>
+        </div>
+        <button type="button" class="btn-close-modal" (click)="closeModelModal()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="modal-cell">
+            <span class="cell-label">Framework</span>
+            <span class="cell-val">{{ selectedModel()?.framework }}</span>
+          </div>
+          <div class="modal-cell">
+            <span class="cell-label">Architecture</span>
+            <span class="cell-val">{{ selectedModel()?.model_type }}</span>
+          </div>
+          <div class="modal-cell">
+            <span class="cell-label">Status</span>
+            <span class="badge badge-success">{{ selectedModel()?.status | uppercase }}</span>
+          </div>
+          <div class="modal-cell">
+            <span class="cell-label">Dataset Source</span>
+            <span class="cell-val">{{ selectedModel()?.dataset_source }}</span>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h3 class="section-heading">Verified Model Metrics</h3>
+          <div class="metrics-grid">
+            <div class="modal-metric-card" *ngFor="let m of (selectedModel()?.metrics | keyvalue)">
+              <span class="m-key">{{ m.key }}</span>
+              <span class="m-val">{{ m.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <h3 class="section-heading">Input Feature Schema ({{ selectedModel()?.input_features?.length }})</h3>
+          <div class="feature-chips-wrap">
+            <span class="feature-badge" *ngFor="let feat of selectedModel()?.input_features">
+              {{ feat }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-modal-close" (click)="closeModelModal()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

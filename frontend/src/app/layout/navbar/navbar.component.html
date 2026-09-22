@@ -1,0 +1,74 @@
+<header class="navbar-container">
+  <div class="navbar-left">
+    <button type="button" class="btn-icon mobile-toggle" (click)="onToggleSidebar()" aria-label="Toggle navigation">
+      <span class="material-symbols-outlined">menu</span>
+    </button>
+    <a routerLink="/dashboard" class="brand-link">
+      <div class="brand-icon-wrapper">
+        <span class="material-symbols-outlined brand-icon">potted_plant</span>
+      </div>
+      <div class="brand-text">
+        <span class="brand-title">Agri<span class="brand-highlight">Pulse</span></span>
+        <span class="brand-badge">DL Precision</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="navbar-center">
+    <nav class="desktop-nav" *ngIf="authService.isAuthenticatedSignal()">
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+        <span class="material-symbols-outlined">dashboard</span>
+        Dashboard
+      </a>
+      <a routerLink="/crop-recommendation" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">eco</span>
+        Crop AI
+      </a>
+      <a routerLink="/price-forecast" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">trending_up</span>
+        Market Price
+      </a>
+      <a routerLink="/yield-forecast" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">agriculture</span>
+        Crop Yield
+      </a>
+      <a routerLink="/decision-support" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">psychology</span>
+        Decision AI
+      </a>
+      <a routerLink="/history" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">history</span>
+        History
+      </a>
+      <a routerLink="/monitoring" routerLinkActive="active" class="nav-link">
+        <span class="material-symbols-outlined">monitoring</span>
+        Monitoring
+      </a>
+    </nav>
+  </div>
+
+  <div class="navbar-right">
+    <ng-container *ngIf="authService.isAuthenticatedSignal(); else authLinks">
+      <div class="user-menu">
+        <a routerLink="/profile" class="user-profile-badge" title="View Profile">
+          <div class="user-avatar">{{ getUserInitials() }}</div>
+          <div class="user-details">
+            <span class="user-name">{{ authService.currentUser()?.name || 'User' }}</span>
+            <span class="user-role">Farmer / Agronomist</span>
+          </div>
+        </a>
+        <button type="button" class="btn-logout" (click)="onLogout()" title="Sign Out">
+          <span class="material-symbols-outlined">logout</span>
+          <span class="logout-text">Logout</span>
+        </button>
+      </div>
+    </ng-container>
+
+    <ng-template #authLinks>
+      <div class="auth-actions">
+        <a routerLink="/login" class="btn-ghost">Log In</a>
+        <a routerLink="/register" class="btn-primary">Register</a>
+      </div>
+    </ng-template>
+  </div>
+</header>

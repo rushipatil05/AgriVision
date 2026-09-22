@@ -1,0 +1,235 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-icon-badge">
+      <span class="material-symbols-outlined">trending_up</span>
+    </div>
+    <div class="header-content">
+      <div class="header-tag">Deep Learning Subsystem 3B</div>
+      <h1 class="page-title">LSTM Commodity Price Forecasting</h1>
+      <p class="page-subtitle">
+        Forecast wholesale mandi price movements across 1, 7, 14, and 30-day forward horizons using AGMARKNET-trained multi-step LSTM recursive lookbacks.
+      </p>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="alert-error" role="alert">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Configuration & Input Form -->
+    <div class="card form-card">
+      <div class="card-header">
+        <h2 class="card-title">Mandi & Price Lookback Config</h2>
+        <span class="badge-tag">Time-Series Input</span>
+      </div>
+
+      <form [formGroup]="priceForm" (ngSubmit)="onSubmit()" class="parameter-form" novalidate>
+        <div class="form-row">
+          <!-- Commodity -->
+          <div class="form-group">
+            <label for="commodity" class="form-label">Commodity</label>
+            <select id="commodity" formControlName="commodity" class="form-control" (change)="onCommodityChange($event)">
+              @for (c of commodities; track c.name) {
+                <option [value]="c.name">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Market -->
+          <div class="form-group">
+            <label for="market" class="form-label">Mandi Market</label>
+            <select id="market" formControlName="market" class="form-control">
+              @for (m of markets; track m) {
+                <option [value]="m">{{ m }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <!-- Forecast Horizon -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="forecast_horizon" class="form-label">Forecast Horizon</label>
+            <span class="unit-tag">Days Ahead (1 - 30)</span>
+          </div>
+          <div class="horizon-presets">
+            <button
+              type="button"
+              class="btn-horizon"
+              [class.active]="priceForm.get('forecast_horizon')?.value === 1"
+              (click)="priceForm.patchValue({ forecast_horizon: 1 })"
+            >
+              1 Day
+            </button>
+            <button
+              type="button"
+              class="btn-horizon"
+              [class.active]="priceForm.get('forecast_horizon')?.value === 7"
+              (click)="priceForm.patchValue({ forecast_horizon: 7 })"
+            >
+              7 Days
+            </button>
+            <button
+              type="button"
+              class="btn-horizon"
+              [class.active]="priceForm.get('forecast_horizon')?.value === 14"
+              (click)="priceForm.patchValue({ forecast_horizon: 14 })"
+            >
+              14 Days
+            </button>
+            <button
+              type="button"
+              class="btn-horizon"
+              [class.active]="priceForm.get('forecast_horizon')?.value === 30"
+              (click)="priceForm.patchValue({ forecast_horizon: 30 })"
+            >
+              30 Days
+            </button>
+          </div>
+        </div>
+
+        <!-- Historical Prices Input -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="pricesInput" class="form-label">Historical Spot Prices (₹/quintal)</label>
+            <button
+              type="button"
+              class="btn-inline-action"
+              (click)="generateSampleSequence()"
+              title="Generate realistic 30-day sequence"
+            >
+              <span class="material-symbols-outlined">restart_alt</span>
+              Generate Real Sequence
+            </button>
+          </div>
+          <textarea
+            id="pricesInput"
+            formControlName="pricesInput"
+            rows="4"
+            class="form-control code-area"
+            placeholder="e.g. 2150.0, 2165.0, 2140.0, 2180.0, 2210.0"
+          ></textarea>
+          <span class="field-hint">Comma-separated price series (30 days recommended).</span>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="btn-spinner"></span>
+            <span>Predicting Price Trajectory...</span>
+          } @else {
+            <span class="material-symbols-outlined">query_stats</span>
+            <span>Forecast Market Price</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Results & Charts Column -->
+    <div class="results-column">
+      @if (isLoading()) {
+        <div class="card loading-card">
+          <app-loading-spinner message="Computing multi-step recursive LSTM price trajectory..."></app-loading-spinner>
+        </div>
+      } @else if (result(); as res) {
+        <!-- Summary Cards Grid -->
+        <div class="summary-cards-grid">
+          <div class="stat-tile">
+            <span class="tile-label">Current Spot Price</span>
+            <div class="tile-val">₹{{ res.last_observed_price.toFixed(2) }}</div>
+            <span class="tile-sub">Base Market Reference</span>
+          </div>
+
+          <div class="stat-tile">
+            <span class="tile-label">Forecast (Day +{{ res.forecast_horizon_days }})</span>
+            <div class="tile-val">₹{{ res.predicted_end_price.toFixed(2) }}</div>
+            <span class="tile-sub">Expected Terminal Value</span>
+          </div>
+
+          <div class="stat-tile" [class]="res.trend_direction.toLowerCase()">
+            <span class="tile-label">Expected Shift</span>
+            <div class="tile-val">
+              {{ (res.predicted_end_price - res.last_observed_price) >= 0 ? '+' : '' }}₹{{ (res.predicted_end_price - res.last_observed_price).toFixed(2) }}
+            </div>
+            <span class="trend-badge" [class]="res.trend_direction.toLowerCase()">
+              {{ res.trend_direction }} ({{ res.projected_percentage_change.toFixed(2) }}%)
+            </span>
+          </div>
+        </div>
+
+        <!-- Trajectory Chart Card -->
+        <div class="card chart-card">
+          <div class="card-header">
+            <div>
+              <h3 class="chart-title">{{ res.commodity }} Price Trajectory ({{ res.market }})</h3>
+              <p class="chart-subtitle">Historical Sequence vs. {{ res.forecast_horizon_days }}-Day LSTM Forecast</p>
+            </div>
+            <span class="latency-pill">{{ res.execution_time_ms.toFixed(1) }} ms</span>
+          </div>
+          <div class="chart-container">
+            <canvas
+              baseChart
+              [data]="lineChartData"
+              [options]="lineChartOptions"
+              [type]="lineChartType"
+            >
+            </canvas>
+          </div>
+        </div>
+
+        <!-- Forecast Table Card -->
+        <div class="card table-card">
+          <h3 class="table-title">Day-by-Day Forecast Schedule</h3>
+          <div class="table-responsive">
+            <table class="forecast-table">
+              <thead>
+                <tr>
+                  <th>Horizon</th>
+                  <th>Forecasted Price</th>
+                  <th>Change vs Base</th>
+                  <th>Action Indication</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (pt of res.forecasts; track pt.day) {
+                  <tr>
+                    <td class="day-cell">Day +{{ pt.day }}</td>
+                    <td class="price-cell">₹{{ pt.predicted_modal_price.toFixed(2) }}</td>
+                    <td [class.positive]="pt.predicted_modal_price >= res.last_observed_price" [class.negative]="pt.predicted_modal_price < res.last_observed_price">
+                      {{ pt.predicted_modal_price >= res.last_observed_price ? '+' : '' }}₹{{ (pt.predicted_modal_price - res.last_observed_price).toFixed(2) }}
+                    </td>
+                    <td>
+                      @if (pt.predicted_modal_price >= res.last_observed_price * 1.02) {
+                        <span class="action-tag hold">Hold / Favorable</span>
+                      } @else if (pt.predicted_modal_price <= res.last_observed_price * 0.98) {
+                        <span class="action-tag sell">Sell Current</span>
+                      } @else {
+                        <span class="action-tag neutral">Stable / Monitor</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      } @else {
+        <!-- Placeholder -->
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <span class="material-symbols-outlined">insights</span>
+          </div>
+          <h3 class="placeholder-title">Ready for Price Forecast</h3>
+          <p class="placeholder-desc">
+            Select an agricultural commodity and market, configure your sequence or click <strong>Generate Real Sequence</strong>, and execute the LSTM model.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>

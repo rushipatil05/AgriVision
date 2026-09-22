@@ -1,0 +1,51 @@
+{
+  "commodity": "Onion",
+  "naive_last_value": {
+    "validation": {
+      "model": "Naive (Last-Value)",
+      "mae": 0.16,
+      "rmse": 3.71,
+      "mape": 0.03,
+      "r2_score": 0.608
+    },
+    "test": {
+      "model": "Naive (Last-Value)",
+      "mae": 89.04,
+      "rmse": 199.7,
+      "mape": 4.81,
+      "r2_score": 0.9611
+    }
+  },
+  "moving_average_7d": {
+    "validation": {
+      "model": "Moving Average (7-Day)",
+      "mae": 0.65,
+      "rmse": 6.59,
+      "mape": 0.11,
+      "r2_score": -0.2378
+    },
+    "test": {
+      "model": "Moving Average (7-Day)",
+      "mae": 160.55,
+      "rmse": 318.31,
+      "mape": 8.41,
+      "r2_score": 0.9011
+    }
+  },
+  "linear_regression": {
+    "validation": {
+      "model": "Linear Regression",
+      "mae": 1.15,
+      "rmse": 4.2,
+      "mape": 0.19,
+      "r2_score": 0.4984
+    },
+    "test": {
+      "model": "Linear Regression",
+      "mae": 101.96,
+      "rmse": 206.7,
+      "mape": 5.47,
+      "r2_score": 0.9583
+    }
+  }
+}

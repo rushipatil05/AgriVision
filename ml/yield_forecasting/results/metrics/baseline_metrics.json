@@ -1,0 +1,78 @@
+{
+  "Median Yield Baseline": {
+    "fit_time_seconds": 0.0,
+    "validation": {
+      "model": "Median Yield Baseline",
+      "mae": 7.108,
+      "rmse": 20.046,
+      "r2_score": -0.1256,
+      "medae": 0.861,
+      "mape": 65.7
+    },
+    "test": {
+      "model": "Median Yield Baseline",
+      "mae": 7.13,
+      "rmse": 20.099,
+      "r2_score": -0.1247,
+      "medae": 0.827,
+      "mape": 70.16
+    }
+  },
+  "Ridge Linear Regression": {
+    "fit_time_seconds": 0.8,
+    "validation": {
+      "model": "Ridge Linear Regression",
+      "mae": 3.896,
+      "rmse": 8.889,
+      "r2_score": 0.7786,
+      "medae": 1.578,
+      "mape": 130.04
+    },
+    "test": {
+      "model": "Ridge Linear Regression",
+      "mae": 3.605,
+      "rmse": 8.706,
+      "r2_score": 0.789,
+      "medae": 1.522,
+      "mape": 122.33
+    }
+  },
+  "Histogram Gradient Boosting": {
+    "fit_time_seconds": 11.23,
+    "validation": {
+      "model": "Histogram Gradient Boosting",
+      "mae": 2.042,
+      "rmse": 6.635,
+      "r2_score": 0.8767,
+      "medae": 0.575,
+      "mape": 46.31
+    },
+    "test": {
+      "model": "Histogram Gradient Boosting",
+      "mae": 1.884,
+      "rmse": 6.208,
+      "r2_score": 0.8927,
+      "medae": 0.567,
+      "mape": 53.92
+    }
+  },
+  "Random Forest Regressor": {
+    "fit_time_seconds": 94.48,
+    "validation": {
+      "model": "Random Forest Regressor",
+      "mae": 1.857,
+      "rmse": 6.163,
+      "r2_score": 0.8936,
+      "medae": 0.436,
+      "mape": 35.27
+    },
+    "test": {
+      "model": "Random Forest Regressor",
+      "mae": 1.783,
+      "rmse": 5.901,
+      "r2_score": 0.9031,
+      "medae": 0.467,
+      "mape": 44.45
+    }
+  }
+}

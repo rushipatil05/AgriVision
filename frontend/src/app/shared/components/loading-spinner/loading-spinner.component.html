@@ -1,0 +1,7 @@
+<div class="spinner-wrapper" [class.size-sm]="size() === 'sm'" [class.size-lg]="size() === 'lg'">
+  <div class="pulse-ring"></div>
+  <div class="spinner-circle"></div>
+  @if (message()) {
+    <p class="spinner-message">{{ message() }}</p>
+  }
+</div>

@@ -1,0 +1,113 @@
+.stat-card {
+  background: #1e293b;
+  border-radius: 16px;
+  padding: 20px 22px;
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stat-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+}
+
+.stat-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon {
+  font-size: 20px;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.2;
+}
+
+.stat-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+}
+
+.stat-trend {
+  font-weight: 600;
+}
+
+.stat-subtitle {
+  color: #64748b;
+}
+
+/* Emerald Theme */
+.theme-emerald .stat-icon-wrapper {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+.theme-emerald .stat-trend {
+  color: #34d399;
+}
+
+/* Teal Theme */
+.theme-teal .stat-icon-wrapper {
+  background: rgba(20, 184, 166, 0.15);
+  color: #14b8a6;
+}
+.theme-teal .stat-trend {
+  color: #2dd4bf;
+}
+
+/* Amber Theme */
+.theme-amber .stat-icon-wrapper {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+.theme-amber .stat-trend {
+  color: #fbbf24;
+}
+
+/* Blue Theme */
+.theme-blue .stat-icon-wrapper {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+.theme-blue .stat-trend {
+  color: #60a5fa;
+}
+
+/* Purple Theme */
+.theme-purple .stat-icon-wrapper {
+  background: rgba(168, 85, 247, 0.15);
+  color: #a855f7;
+}
+.theme-purple .stat-trend {
+  color: #c084fc;
+}

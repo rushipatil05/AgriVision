@@ -1,0 +1,70 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="header-icon-badge">
+      <span class="material-symbols-outlined">person</span>
+    </div>
+    <div class="header-content">
+      <div class="header-tag">Account Management</div>
+      <h1 class="page-title">User Profile & Credentials</h1>
+      <p class="page-subtitle">Manage your account information, session authentication, and platform usage metrics.</p>
+    </div>
+  </header>
+
+  <div class="profile-grid">
+    <!-- User Information Card -->
+    <div class="card user-info-card">
+      <div class="avatar-large">
+        <span class="material-symbols-outlined">account_circle</span>
+      </div>
+      <h2 class="user-fullname">{{ user()?.name || 'Authorized Agronomist' }}</h2>
+      <span class="user-email">{{ user()?.email }}</span>
+      <span class="role-badge">Precision Agriculture Researcher</span>
+
+      <div class="user-stats-row">
+        <div class="u-stat">
+          <span class="u-val">{{ totalPredictions() }}</span>
+          <span class="u-lbl">Total Inferences</span>
+        </div>
+        <div class="u-stat">
+          <span class="u-val">Active</span>
+          <span class="u-lbl">Account Status</span>
+        </div>
+      </div>
+
+      <button type="button" class="btn-logout" (click)="onLogout()">
+        <span class="material-symbols-outlined">logout</span>
+        <span>Sign Out Account</span>
+      </button>
+    </div>
+
+    <!-- Security & System Metadata -->
+    <div class="card details-card">
+      <div class="card-header">
+        <h3 class="card-title">Security & Session Parameters</h3>
+      </div>
+
+      <div class="info-list">
+        <div class="info-item">
+          <span class="info-label">User ID (Subject Claim):</span>
+          <span class="info-value code">#{{ user()?.id || 1 }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Authentication Method:</span>
+          <span class="info-value">JWT Bearer (HS256)</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Password Storage:</span>
+          <span class="info-value">Bcrypt (12 rounds)</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Registration Timestamp:</span>
+          <span class="info-value">{{ (user()?.created_at | date: 'medium') || 'Verified' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Data Isolation:</span>
+          <span class="info-value">Multi-tenant User-Scoped DB Partitioning</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

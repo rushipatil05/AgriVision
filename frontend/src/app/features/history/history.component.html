@@ -1,0 +1,253 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-icon-badge">
+      <span class="material-symbols-outlined">history</span>
+    </div>
+    <div class="header-content">
+      <div class="header-tag">Audited Inference Log</div>
+      <h1 class="page-title">Prediction History & Logs</h1>
+      <p class="page-subtitle">
+        Track, filter, inspect, and manage all your deep learning inferences recorded across Crop Recommendation, Price Forecasting, and Yield Forecasting modules.
+      </p>
+    </div>
+  </header>
+
+  @if (errorMessage()) {
+    <div class="alert-error" role="alert">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Filter Tabs & Stats -->
+  <section class="filters-bar">
+    <div class="filter-tabs">
+      <button
+        type="button"
+        class="filter-tab"
+        [class.active]="selectedFilter() === 'ALL'"
+        (click)="setFilter('ALL')"
+      >
+        <span>All Inferences</span>
+        <span class="tab-count">{{ total() }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="filter-tab"
+        [class.active]="selectedFilter() === 'CROP_RECOMMENDATION'"
+        (click)="setFilter('CROP_RECOMMENDATION')"
+      >
+        <span class="material-symbols-outlined tab-icon emerald">eco</span>
+        <span>Crop Recommendations</span>
+      </button>
+
+      <button
+        type="button"
+        class="filter-tab"
+        [class.active]="selectedFilter() === 'PRICE_FORECAST'"
+        (click)="setFilter('PRICE_FORECAST')"
+      >
+        <span class="material-symbols-outlined tab-icon amber">trending_up</span>
+        <span>Price Forecasts</span>
+      </button>
+
+      <button
+        type="button"
+        class="filter-tab"
+        [class.active]="selectedFilter() === 'YIELD_FORECAST'"
+        (click)="setFilter('YIELD_FORECAST')"
+      >
+        <span class="material-symbols-outlined tab-icon blue">agriculture</span>
+        <span>Yield Forecasts</span>
+      </button>
+
+      <button
+        type="button"
+        class="filter-tab"
+        [class.active]="selectedFilter() === 'DECISION'"
+        (click)="setFilter('DECISION')"
+      >
+        <span class="material-symbols-outlined tab-icon purple">psychology</span>
+        <span>Decision Support</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- Table Container Card -->
+  <div class="card table-card">
+    @if (isLoading()) {
+      <app-loading-spinner message="Loading prediction audit records..."></app-loading-spinner>
+    } @else if (records().length === 0) {
+      <app-empty-state
+        title="No prediction history found"
+        message="You have not executed any model inferences under this filter category yet."
+        icon="history_toggle_off"
+      >
+        <a routerLink="/dashboard" class="btn-primary">Return to Dashboard</a>
+      </app-empty-state>
+    } @else {
+      <div class="table-responsive">
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>ID & Timestamp</th>
+              <th>Module / Subsystem</th>
+              <th>Inference Output</th>
+              <th>Latency</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of records(); track item.id) {
+              <tr>
+                <td class="time-col">
+                  <span class="record-id">#{{ item.id }}</span>
+                  <span class="record-time">{{ item.created_at | date: 'MMM d, y, h:mm a' }}</span>
+                </td>
+
+                <td>
+                  <span class="type-pill" [class]="item.prediction_type.toLowerCase()">
+                    <span class="material-symbols-outlined pill-icon">
+                      {{
+                        item.prediction_type.includes('DECISION')
+                          ? 'psychology'
+                          : item.prediction_type.includes('CROP')
+                          ? 'eco'
+                          : item.prediction_type.includes('PRICE')
+                          ? 'trending_up'
+                          : 'agriculture'
+                      }}
+                    </span>
+                    <span>{{ item.prediction_type.replace('_', ' ') }}</span>
+                  </span>
+                </td>
+
+                <td class="summary-col">
+                  <span class="summary-text">{{ formatSummary(item) }}</span>
+                </td>
+
+                <td>
+                  <span class="latency-tag">{{ item.latency_ms ? item.latency_ms.toFixed(1) + ' ms' : 'N/A' }}</span>
+                </td>
+
+                <td class="actions-col">
+                  <button
+                    type="button"
+                    class="btn-icon view"
+                    (click)="openDetailModal(item)"
+                    title="View Raw JSON Payload"
+                  >
+                    <span class="material-symbols-outlined">visibility</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-icon delete"
+                    (click)="promptDelete(item)"
+                    title="Delete Record"
+                  >
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination-bar">
+        <div class="pagination-info">
+          Showing Page {{ currentPage() }} of {{ totalPages() }} ({{ total() }} total records)
+        </div>
+        <div class="pagination-buttons">
+          <button
+            type="button"
+            class="btn-page"
+            [disabled]="currentPage() <= 1"
+            (click)="setPage(currentPage() - 1)"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+            Previous
+          </button>
+
+          <span class="page-num">{{ currentPage() }}</span>
+
+          <button
+            type="button"
+            class="btn-page"
+            [disabled]="currentPage() >= totalPages()"
+            (click)="setPage(currentPage() + 1)"
+          >
+            Next
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Detail Modal -->
+  @if (selectedItem(); as modalItem) {
+    <div class="modal-backdrop" (click)="closeDetailModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-title-group">
+            <span class="material-symbols-outlined modal-header-icon">code</span>
+            <h3 class="modal-title">Prediction Record Details (#{{ modalItem.id }})</h3>
+          </div>
+          <button type="button" class="btn-modal-close" (click)="closeDetailModal()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="payload-section">
+            <h4 class="payload-title">Input Parameters Payload</h4>
+            <pre class="json-code"><code>{{ formatJson(modalItem.input_data) }}</code></pre>
+          </div>
+
+          <div class="payload-section">
+            <h4 class="payload-title">Model Prediction Response</h4>
+            <pre class="json-code"><code>{{ formatJson(modalItem.prediction_result) }}</code></pre>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn-modal-dismiss" (click)="closeDetailModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Delete Confirmation Modal -->
+  @if (itemToDelete(); as delItem) {
+    <div class="modal-backdrop" (click)="cancelDelete()">
+      <div class="modal-dialog delete-dialog" (click)="$event.stopPropagation()">
+        <div class="delete-icon-circle">
+          <span class="material-symbols-outlined">warning</span>
+        </div>
+        <h3 class="modal-title">Delete Prediction Record?</h3>
+        <p class="delete-warning-text">
+          Are you sure you want to permanently delete record #{{ delItem.id }} ({{ delItem.prediction_type }})? This action cannot be undone.
+        </p>
+
+        <div class="modal-actions-row">
+          <button type="button" class="btn-cancel" (click)="cancelDelete()" [disabled]="isDeleting()">
+            Cancel
+          </button>
+          <button type="button" class="btn-confirm-delete" (click)="confirmDelete()" [disabled]="isDeleting()">
+            @if (isDeleting()) {
+              <span class="btn-spinner"></span>
+              <span>Deleting...</span>
+            } @else {
+              <span>Delete Record</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

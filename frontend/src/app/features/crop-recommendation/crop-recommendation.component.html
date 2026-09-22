@@ -1,0 +1,229 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="header-icon-badge">
+      <span class="material-symbols-outlined">psychology</span>
+    </div>
+    <div class="header-content">
+      <div class="header-tag">Deep Learning Subsystem 3A</div>
+      <h1 class="page-title">LSTM Crop Recommendation AI</h1>
+      <p class="page-subtitle">
+        Input soil chemical compositions and meteorological metrics to compute multi-class probabilistic crop suitability (98.48% Accuracy).
+      </p>
+    </div>
+  </header>
+
+  <!-- Quick Presets -->
+  <section class="presets-section">
+    <span class="presets-label">Quick Test Presets:</span>
+    <div class="preset-buttons">
+      @for (preset of presets; track preset.name) {
+        <button
+          type="button"
+          class="btn-preset"
+          (click)="applyPreset(preset)"
+          [title]="preset.description"
+        >
+          <span class="material-symbols-outlined">science</span>
+          <span>{{ preset.name }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  @if (errorMessage()) {
+    <div class="alert-error" role="alert">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  <!-- Main Grid: Input Form (Left) & Visualizations (Right) -->
+  <div class="content-grid">
+    <!-- Form Card -->
+    <div class="card form-card">
+      <div class="card-header">
+        <h2 class="card-title">Soil & Climate Parameters</h2>
+        <span class="badge-tag">7 Required Features</span>
+      </div>
+
+      <form [formGroup]="cropForm" (ngSubmit)="onSubmit()" class="parameter-form" novalidate>
+        <div class="form-row">
+          <!-- Nitrogen -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="N" class="form-label">Nitrogen (N)</label>
+              <span class="unit-tag">kg/ha [0 - 140]</span>
+            </div>
+            <input id="N" type="number" formControlName="N" class="form-control" />
+            @if (cropForm.get('N')?.invalid && cropForm.get('N')?.touched) {
+              <span class="error-msg">Value must be between 0 and 140.</span>
+            }
+          </div>
+
+          <!-- Phosphorus -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="P" class="form-label">Phosphorus (P)</label>
+              <span class="unit-tag">kg/ha [5 - 145]</span>
+            </div>
+            <input id="P" type="number" formControlName="P" class="form-control" />
+            @if (cropForm.get('P')?.invalid && cropForm.get('P')?.touched) {
+              <span class="error-msg">Value must be between 5 and 145.</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Potassium -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="K" class="form-label">Potassium (K)</label>
+              <span class="unit-tag">kg/ha [5 - 205]</span>
+            </div>
+            <input id="K" type="number" formControlName="K" class="form-control" />
+            @if (cropForm.get('K')?.invalid && cropForm.get('K')?.touched) {
+              <span class="error-msg">Value must be between 5 and 205.</span>
+            }
+          </div>
+
+          <!-- Soil pH -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="ph" class="form-label">Soil pH Level</label>
+              <span class="unit-tag">pH [3.5 - 10.0]</span>
+            </div>
+            <input id="ph" type="number" step="0.1" formControlName="ph" class="form-control" />
+            @if (cropForm.get('ph')?.invalid && cropForm.get('ph')?.touched) {
+              <span class="error-msg">Value must be between 3.5 and 10.0.</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row">
+          <!-- Temperature -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="temperature" class="form-label">Temperature</label>
+              <span class="unit-tag">°C [8 - 45]</span>
+            </div>
+            <input id="temperature" type="number" step="0.1" formControlName="temperature" class="form-control" />
+            @if (cropForm.get('temperature')?.invalid && cropForm.get('temperature')?.touched) {
+              <span class="error-msg">Value must be between 8 and 45 °C.</span>
+            }
+          </div>
+
+          <!-- Humidity -->
+          <div class="form-group">
+            <div class="label-row">
+              <label for="humidity" class="form-label">Humidity</label>
+              <span class="unit-tag">% [14 - 100]</span>
+            </div>
+            <input id="humidity" type="number" step="0.1" formControlName="humidity" class="form-control" />
+            @if (cropForm.get('humidity')?.invalid && cropForm.get('humidity')?.touched) {
+              <span class="error-msg">Value must be between 14 and 100%.</span>
+            }
+          </div>
+        </div>
+
+        <!-- Rainfall -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="rainfall" class="form-label">Annual Rainfall</label>
+            <span class="unit-tag">mm [20 - 300]</span>
+          </div>
+          <input id="rainfall" type="number" step="0.1" formControlName="rainfall" class="form-control" />
+          @if (cropForm.get('rainfall')?.invalid && cropForm.get('rainfall')?.touched) {
+            <span class="error-msg">Value must be between 20 and 300 mm.</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="btn-spinner"></span>
+            <span>Running LSTM Inference...</span>
+          } @else {
+            <span class="material-symbols-outlined">auto_awesome</span>
+            <span>Compute Crop Recommendation</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Results & Visualization Column -->
+    <div class="results-column">
+      @if (isLoading()) {
+        <div class="card loading-card">
+          <app-loading-spinner message="Running multi-layer LSTM neural inference..."></app-loading-spinner>
+        </div>
+      } @else if (result(); as res) {
+        <!-- Primary Recommendation Hero -->
+        <div class="hero-result-card">
+          <div class="hero-glow"></div>
+          <div class="hero-header">
+            <span class="hero-tag">Recommended Optimal Crop</span>
+            <span class="latency-pill">{{ res.execution_time_ms.toFixed(1) }} ms</span>
+          </div>
+          <div class="hero-body">
+            <div class="crop-badge-icon">
+              <span class="material-symbols-outlined">eco</span>
+            </div>
+            <div class="crop-info">
+              <h2 class="crop-name">{{ res.recommended_crop | titlecase }}</h2>
+              <div class="confidence-container">
+                <span class="confidence-label">Confidence Score:</span>
+                <span class="confidence-value">{{ (res.confidence * 100).toFixed(2) }}%</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-footer">
+            <span class="model-badge">Arch: LSTM</span>
+            <span class="feature-match-badge">7/7 Agro-Climatic Match</span>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <!-- Top-5 Probability Bar Chart -->
+          <div class="card chart-card">
+            <h3 class="chart-title">Top 5 Ranked Crop Probabilities</h3>
+            <div class="chart-container">
+              <canvas
+                baseChart
+                [data]="barChartData"
+                [options]="barChartOptions"
+                [type]="barChartType"
+              >
+              </canvas>
+            </div>
+          </div>
+
+          <!-- Radar Profile Chart -->
+          <div class="card chart-card">
+            <h3 class="chart-title">Nutrient & Climate Radar</h3>
+            <div class="chart-container">
+              <canvas
+                baseChart
+                [data]="radarChartData"
+                [options]="radarChartOptions"
+                [type]="radarChartType"
+              >
+              </canvas>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Initial Placeholder Card -->
+        <div class="card placeholder-card">
+          <div class="placeholder-icon">
+            <span class="material-symbols-outlined">grain</span>
+          </div>
+          <h3 class="placeholder-title">Ready for Recommendation</h3>
+          <p class="placeholder-desc">
+            Adjust the soil nutrient and meteorological parameters on the left or select a quick test preset above, then click <strong>Compute Crop Recommendation</strong>.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</div>
