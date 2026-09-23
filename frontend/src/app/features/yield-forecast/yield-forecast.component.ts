@@ -76,7 +76,7 @@ export class YieldForecastComponent {
     season: ['Rabi', Validators.required],
     area: [10.0, [Validators.required, Validators.min(0.01)]],
     crop_year: [2024, [Validators.required, Validators.min(1990), Validators.max(2035)]],
-    model_type: ['deep_neural_network']
+    model_type: ['dnn']
   });
 
   public applyPreset(preset: YieldPreset): void {
