@@ -16,7 +16,10 @@ describe('CropRecommendationComponent', () => {
         success: true,
         data: {
           recommended_crop: 'rice',
-          confidence: 0.998,
+          recommendations: [
+            { crop: 'rice', probability: 0.998 },
+            { crop: 'jute', probability: 0.001 }
+          ],
           top_recommendations: [
             { crop: 'rice', probability: 0.998, rank: 1 },
             { crop: 'jute', probability: 0.001, rank: 2 }

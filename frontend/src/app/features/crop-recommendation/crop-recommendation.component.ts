@@ -209,7 +209,7 @@ export class CropRecommendationComponent {
   }
 
   private updateCharts(res: CropRecommendationResponse, inputs: any): void {
-    const top = res.recommendations || [];
+    const top = res.recommendations || (res as any).top_recommendations || [];
     const labels = top.map((t) => t.crop.charAt(0).toUpperCase() + t.crop.slice(1));
     const probs = top.map((t) => t.probability);
 

@@ -18,5 +18,6 @@ export interface CropRecommendationResponse {
   recommended_crop: string;
   confidence: number;
   recommendations: RankedCropProbability[];
+  top_recommendations?: RankedCropProbability[];
   execution_time_ms: number;
 }
