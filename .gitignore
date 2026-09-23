@@ -70,6 +70,10 @@ htmlcov/
 *.pth
 *.onnx
 
+# Allow trained ML subsystem models and preprocessors (<2MB total)
+!ml/**/model/*.keras
+!ml/**/model/*.joblib
+
 # EDA Visualization Plots
 *.png
 *.jpg
