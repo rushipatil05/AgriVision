@@ -97,7 +97,7 @@ jobs:
       - name: Verify Backend Docker Build
         uses: docker/build-push-action@v5
         with:
-          context: ./backend
+          context: .
           file: ./backend/Dockerfile
           push: false
           tags: agripulse-backend:ci
